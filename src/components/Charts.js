@@ -21,19 +21,26 @@ function CustomToolTip({ payload, label, active, currency = "usd" }) {
 }
 
 const ChartComponent = ({ data, currency, type }) => {
+    console.log("Console from chart component", currency);
+
+    // If data is empty or undefined, display a loading message
+    if (!data || data.length === 0) {
+        return <p>No data available for the chart.</p>;
+    }
+
     return (
-        <ResponsiveContainer height={'90%'}>
+        <ResponsiveContainer height={'90%'} width="100%">
             <LineChart width={400} height={400} data={data}>
                 <Line type={'monotone'} dataKey={type} stroke='#14ffec' strokeWidth={"1px"} />
                 <CartesianGrid stroke='#323232' />
-                <XAxis dataKey={"date"} hide />
-                <YAxis dataKey={type} hide domain={["auto", "auto"]} />
+                <XAxis dataKey={"date"} />
+                <YAxis dataKey={type} domain={["auto", "auto"]} />
                 <Tooltip content={<CustomToolTip currency={currency} />} cursor={false} wrapperStyle={{ outline: "none" }} />
                 <Legend />
             </LineChart>
         </ResponsiveContainer>
-    )
-}
+    );
+};
 
 const Charts = ({ id }) => {
     const [type, setType] = useState("prices");
@@ -66,9 +73,14 @@ const Charts = ({ id }) => {
 
         getChartData(id);
     }, [id, type, days])
+
     return (
-        <div className='w-full h-[60%]'>
-            <ChartComponent data={chartData} currency={currency} type={type} />
+        <div className='w-full h-80'>
+            {chartData && chartData.length > 0 ? (
+                <ChartComponent data={chartData} currency={currency} type={type} />
+            ) : (
+                <p>Loading chart data...</p>
+            )}
             <div className="flex flex-wrap">
                 <button className={`text-sm py-0.5 px-1.5 ml-2 bg-opacity-25 rounded capitalize ${type === 'prices' ? 'bg-cyan text-cyan' : 'bg-gray-200 text-gray-100'}`} onClick={() => setType("prices")}>Price</button>
                 <button className={`text-sm py-0.5 px-1.5 ml-2 bg-opacity-25 rounded capitalize ${type === 'market_caps' ? 'bg-cyan text-cyan' : 'bg-gray-200 text-gray-100'}`} onClick={() => setType("market_caps")}>market caps</button>
